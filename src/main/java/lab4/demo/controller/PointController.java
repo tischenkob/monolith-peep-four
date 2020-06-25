@@ -3,6 +3,7 @@ package lab4.demo.controller;
 import lab4.demo.dao.PointRepository;
 import lab4.demo.entity.Point;
 import lab4.demo.service.AreaCheck;
+import lab4.demo.service.PointService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,11 +16,13 @@ import java.security.Principal;
 public class PointController {
     private final PointRepository pointRepository;
     private final AreaCheck areaCheck;
+    private final PointService pointService;
     private static final Logger logger = LoggerFactory.getLogger(PointController.class);
 
-    PointController(PointRepository pointRepository, AreaCheck areaCheck) {
+    PointController(PointRepository pointRepository, AreaCheck areaCheck, PointService pointService) {
         this.pointRepository = pointRepository;
         this.areaCheck = areaCheck;
+        this.pointService=pointService;
     }
 
     @CrossOrigin
@@ -34,12 +37,11 @@ public class PointController {
     @PostMapping("/api/addEntry")
     ResponseEntity<?> newPoint(@RequestBody Point newPoint, Principal principal) {
         if (!areaCheck.isGood(newPoint)){
-            logger.error("bad point from "+principal.getName());
             throw new ResourceException(HttpStatus.BAD_REQUEST,"Неверный формат данных");
         }
         newPoint.setHit(areaCheck.isInArea(newPoint));
         newPoint.setUsername(principal.getName());
-        logger.info("newPoint:" +newPoint.toString());
+        pointService.addNewPoint(newPoint);
         return new ResponseEntity<>(
                 pointRepository.save(newPoint),
                 HttpStatus.OK);
