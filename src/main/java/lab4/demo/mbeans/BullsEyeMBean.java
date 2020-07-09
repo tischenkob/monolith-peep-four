@@ -11,5 +11,5 @@ public interface BullsEyeMBean {
 
     void incrementConsecutiveMissesCount();
 
-    int processPoint(Point point);
+    void processPoint(Point point);
 }
